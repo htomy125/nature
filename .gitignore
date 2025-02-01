@@ -20,3 +20,8 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# configs.py
+ewallet.pem
+tnsnames.ora
+__pycache__/

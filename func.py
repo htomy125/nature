@@ -1,23 +1,29 @@
 #!/usr/local/bin/python
 from uuid6 import uuid7
-from remo import NatureRemoAPI
+# from remo import NatureRemoAPI
 import oracledb
 import datetime
+import requests
+import json
 import pprint
 import configs
-
-device_name = configs.device_name
-api = NatureRemoAPI(configs.apikey)
 
 def get_nature_events() :
     events = {}
     events["probe_time"] = datetime.datetime.now(datetime.timezone.utc)
 
-    devices = api.get_devices()
+    url = "https://api.nature.global/1/devices"
+    h = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {configs.apikey}"
+        }
+
+    devices = json.loads(requests.get(url=url, headers=h).text)
+
     for d in devices :
-        if d.name == device_name :
-            events["hu"] = d.newest_events["hu"]
-            events["te"] = d.newest_events["te"]
+        if d["name"] == configs.device_name :
+            events["hu"] = d["newest_events"]["hu"]
+            events["te"] = d["newest_events"]["te"]
             return events
 
 def get_data_ids(flags:list) :
@@ -56,4 +62,7 @@ def insert_data(events) :
 
 # main
 
-insert_data(get_nature_events())
+# insert_data(get_nature_events())
+
+events = get_nature_events()
+
