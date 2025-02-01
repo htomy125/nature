@@ -22,8 +22,10 @@ def get_nature_events() :
 
     for d in devices :
         if d["name"] == configs.device_name :
-            events["hu"] = d["newest_events"]["hu"]
-            events["te"] = d["newest_events"]["te"]
+            ne = d["newest_events"]
+            for val_type in ["hu", "te"] :
+                events[val_type] = ne[val_type]
+                events[val_type]["created_at"] = datetime.datetime.strptime(ne[val_type]["created_at"], "%Y-%m-%dT%H:%M:%SZ")
             return events
 
 def get_data_ids(flags:list) :
@@ -50,19 +52,17 @@ def insert_data(events) :
                     values (:data_id, :probe_time, :val_type, :value, :created_at)"""
         
             value_types = ["hu", "te"]
-            ids = get_data_ids(["hu", "te"])
+            ids = get_data_ids(value_types)
 
             for val_type in value_types :
                 cursor.execute(sql, 
                             [ids[val_type], events["probe_time"], val_type, 
-                                events[val_type].val, events[val_type].created_at
+                                events[val_type]["val"], events[val_type]["created_at"]
                             ]
                         )
         connection.commit()
 
 # main
 
-# insert_data(get_nature_events())
-
-events = get_nature_events()
+insert_data(get_nature_events())
 
